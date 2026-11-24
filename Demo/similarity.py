@@ -4,13 +4,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import spacy
 import pdfplumber
 
-with pdfplumber.open('GEO_Tool_Partner_Requirements.pdf') as pdf:
-    for page in pdf.pages:
-        problem = page.extract_text()
+problem_text = pdfplumber.open('GEO_Tool_Partner_Requirements.pdf')
+for page in problem_text.pages:
+    problem = page.extract_text()
 
-with pdfplumber.open('reseachPapers.pdf') as pdf:
-    for paper in pdf.pages:
-        research = paper.extract_text()
+research_text = pdfplumber.open('reseachPapers.pdf')
+for paper in research_text.pages:
+    research = paper.extract_text()
 
 data = ([problem,research])
 
@@ -26,7 +26,16 @@ vector2 = nlp(research)
 
 textSimilarity = vector1.similarity(vector2)
 
-print(f'cosine similarity = {cosineSimilarity[0,1] * 100} %')
+model = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
+
+problemEmbedding = model.encode(problem)
+researchEmbedding = model.encode(research)
+
+cosineSimilarity_embedding = cosine_similarity([problemEmbedding], [researchEmbedding])[0][0]
+
+print(f'lexical similarity = {cosineSimilarity_tfidf[0,1] * 100} %')
 print(f'text similarity using spacy = {textSimilarity * 100} %')
+print(f'semantic similarity = {cosineSimilarity_embedding * 100} %')
+
 
 
